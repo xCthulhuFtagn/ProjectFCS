@@ -17,10 +17,13 @@ def get_new_trns(q_out: Queue):
     """
     i = 1
     wss = NODE_ADDRESS
-    print(wss)
-    w3 = Web3(Web3.WebsocketProvider(wss))
-    print(f'Node Connection - {w3.is_connected()}')
-    print(f'Connection attempt - {i}')
+    connected = False
+    while not connected:
+        w3 = Web3(Web3.WebsocketProvider(wss))
+        connected = w3.is_connected()
+        print(f'Node Connection - {connected}')
+        print(f'Connection attempt - {i}')
+        i+=1
     while True:
         try:
             start_time = time.time()
