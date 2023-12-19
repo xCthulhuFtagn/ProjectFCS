@@ -2,8 +2,8 @@ import pickle
 import numpy as np
 from evmdasm import EvmBytecode
 
-with open("model.pkl", "rb") as f:
-    model = pickle.load() # yours model
+with open("./Model/model.sav", "rb") as f:
+    model = pickle.load(f) # yours model
 tr = 0.6 # yours threshold
 trfrm = lambda string_opcode: np.apply(lambda opcode: string_opcode.count(opcode),opcodes) # yours vectorizer
 

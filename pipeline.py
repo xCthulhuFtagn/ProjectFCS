@@ -5,6 +5,7 @@ from multiprocessing import Process, Manager, Queue, Lock
 import time
 
 def get_new_trns(q_out: Queue):
+    print("get_new_trns")
     """
     !Work in separate process
 
@@ -16,6 +17,7 @@ def get_new_trns(q_out: Queue):
     """
     i = 1
     wss = NODE_ADDRESS
+    print(wss)
     w3 = Web3(Web3.WebsocketProvider(wss))
     print(f'Node Connection - {w3.is_connected()}')
     print(f'Connection attempt - {i}')
@@ -29,10 +31,12 @@ def get_new_trns(q_out: Queue):
             end_time = time.time()
             print(f"{end_time - start_time} per 1 batch")
         except Exception as e:
+            print(e)
             #TODO Ваша обработка нарушения соединения с нодой
             pass
 
 def analyze_trns(q_in: Queue):
+    print("analyze_trns")
     """
     !Work in separate process
     

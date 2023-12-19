@@ -1,1 +1,1 @@
-NODE_ADDRESS = None # put your node adr here
+NODE_ADDRESS = "wss://ethereum-mainnet.core.chainstack.com/ws/a35ed9a220fcc4a71f2081a65d892ada" # put your node adr here
