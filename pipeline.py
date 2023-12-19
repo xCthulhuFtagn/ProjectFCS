@@ -48,12 +48,17 @@ def analyze_trns(q_in: Queue):
     :return:
     """
     #TODO Ваша имплементация
-    trns_address = None
-    trns_hash = None
-    y_class = None
-    print(f"Address - {trns_address}"
-          f"Hash - {trns_hash}"
-          f"Is_malicious? {y_class}")
+    while True:
+        if q_in.empty(): continue
+        transact = q_in.get()
+        opcode = decompile(transact['input'])
+        trns_address = transact['to']
+        trns_hash = transact['Hash']
+        y_class = inference(opcode)
+        print(f"Address - {trns_address}"
+            f"Hash - {trns_hash}"
+            f"Is_malicious? {y_class}")
+
 
 if __name__ == '__main__':
     print('Hello there!')
