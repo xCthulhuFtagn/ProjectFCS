@@ -27,6 +27,8 @@ def get_new_trns(q_out: Queue):
     while True:
         try:
             start_time = time.time()
+            time.sleep(5)
+            # тут умирает, если запускать вне ipynb
             trns_block = w3.eth.get_block('new_block', full_transactions=True).transactions # считываем батч новых транз
             for trns in trns_block:
                 if trns['to'] is None: # смотрим что транзакция это деплой
@@ -62,8 +64,8 @@ def analyze_trns(q_in: Queue):
         trns_address = transact['to']
         trns_hash = transact['Hash']
         y_class = inference(opcode)
-        print(f"Address - {trns_address}"
-            f"Hash - {trns_hash}"
+        print(f"Address - {trns_address}, "
+            f"Hash - {trns_hash}, "
             f"Is_malicious? {y_class}")
 
 

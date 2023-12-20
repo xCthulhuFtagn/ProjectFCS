@@ -5,7 +5,7 @@ from evmdasm import EvmBytecode
 with open("./Model/model.sav", "rb") as f:
     model = pickle.load(f) # yours model
 tr = 0.6 # yours threshold
-trfrm = lambda string_opcode: np.apply(lambda opcode: string_opcode.count(opcode),opcodes) # yours vectorizer
+trfrm = lambda string_opcode: np.fromiter(map(lambda opcode: string_opcode.count(opcode),opcodes), np.ndarray, len(opcodes)) # yours vectorizer
 
 opcodes = np.array(['STOP', 'ADD', 'MUL', 'SUB','DIV','SDIV', 'MOD', 'SMOD',
     'ADDMOD', 'MULMOD', 'EXP', 'SIGNEXTEND', 'LT', 'GT', 'SLT', 'SGT',
@@ -33,7 +33,7 @@ def decompile(_bytecode: str):
     opcode = disassembler.disassemble().as_string
     print('Normalizing opcode')
     opcode_normalized = opcode.replace(' \n', '\n').replace(' ', ' 0x')
-    return opcode_normalized.lower()
+    return opcode_normalized.upper()
 
 def inference(_opcode: str):
     """
@@ -41,6 +41,6 @@ def inference(_opcode: str):
     :param _opcode:
     :return: класс смарт-контракта
     """
-    X = vectorizer(_opcode)
+    X = trfrm(_opcode).reshape(1, -1)
     y_proba = model.predict_proba(X) # скор вашей модели
-    return int(y_proba > tr)
+    return y_proba[:, 1] > tr
