@@ -4,6 +4,10 @@ from keys import NODE_ADDRESS
 from multiprocessing import Process, Manager, Queue, Lock
 import time
 
+import warnings
+
+warnings.filterwarnings("ignore")
+
 def get_new_trns(q_out: Queue):
     print("get_new_trns")
     """
@@ -24,15 +28,20 @@ def get_new_trns(q_out: Queue):
         print(f'Node Connection - {connected}')
         print(f'Connection attempt - {i}')
         i+=1
+        
+    prev = []
     while True:
         try:
             start_time = time.time()
-            time.sleep(5)
-            # тут умирает, если запускать вне ipynb
-            trns_block = w3.eth.get_block('new_block', full_transactions=True).transactions # считываем батч новых транз
-            for trns in trns_block:
-                if trns['to'] is None: # смотрим что транзакция это деплой
-                    q_out.put(trns)
+            trns_block = w3.eth.get_block('latest', full_transactions=True, ).transactions # считываем батч новых транз
+            if trns_block not in prev:
+                prev = [trns_block]
+                trns_set = set()
+                for trns in trns_block:
+                    if trns in trns_set: continue
+                    else: trns_set.add(trns)
+                    if trns['to'] is None and trns['input'].hex()[:10] == '0x60806040': # смотрим что транзакция это деплой
+                        q_out.put(trns)
             end_time = time.time()
             print(f"{end_time - start_time} per 1 batch")
         except Exception as e:
@@ -58,14 +67,15 @@ def analyze_trns(q_in: Queue):
     """
     #TODO Ваша имплементация
     while True:
+        # time.sleep(2)
         if q_in.empty(): continue
         transact = q_in.get()
         opcode = decompile(transact['input'])
         trns_address = transact['to']
-        trns_hash = transact['Hash']
+        trns_hash = transact.get('Hash', None)
         y_class = inference(opcode)
-        print(f"Address - {trns_address}, "
-            f"Hash - {trns_hash}, "
+        print(f"Address - {trns_address}"
+            f"Hash - {trns_hash}"
             f"Is_malicious? {y_class}")
 
 
@@ -86,5 +96,7 @@ if __name__ == '__main__':
     # start
     new_deploys_tracker.start()
     deploy_analyzer.start()
+    new_deploys_tracker.join()
+    deploy_analyzer.join()
 
 
