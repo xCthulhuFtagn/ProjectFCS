@@ -21,33 +21,34 @@ def get_new_trns(q_out: Queue):
     """
     i = 1
     wss = NODE_ADDRESS
-    connected = False
-    while not connected:
-        w3 = Web3(Web3.WebsocketProvider(wss))
-        connected = w3.is_connected()
-        print(f'Node Connection - {connected}')
-        print(f'Connection attempt - {i}')
-        i+=1
-        
-    prev = []
     while True:
-        try:
-            start_time = time.time()
-            trns_block = w3.eth.get_block('latest', full_transactions=True, ).transactions # считываем батч новых транз
-            if trns_block not in prev:
-                prev = [trns_block]
-                trns_set = set()
-                for trns in trns_block:
-                    if trns in trns_set: continue
-                    else: trns_set.add(trns)
-                    if trns['to'] is None and trns['input'].hex()[:10] == '0x60806040': # смотрим что транзакция это деплой
-                        q_out.put(trns)
-            end_time = time.time()
-            print(f"{end_time - start_time} per 1 batch")
-        except Exception as e:
-            print(e)
-            #TODO Ваша обработка нарушения соединения с нодой
-            pass
+        connected = False
+        while not connected:
+            w3 = Web3(Web3.WebsocketProvider(wss))
+            connected = w3.is_connected()
+            print(f'Node Connection - {connected}')
+            print(f'Connection attempt - {i}')
+            i+=1
+            
+        prev = []
+        while True:
+            try:
+                start_time = time.time()
+                trns_block = w3.eth.get_block('latest', full_transactions=True, ).transactions # считываем батч новых транз
+                if trns_block not in prev:
+                    prev = [trns_block]
+                    trns_set = set()
+                    for trns in trns_block:
+                        if trns in trns_set: continue
+                        else: trns_set.add(trns)
+                        if trns['to'] is None and trns['input'].hex()[:10] == '0x60806040': # смотрим что транзакция это деплой
+                            q_out.put(trns)
+                end_time = time.time()
+                print(f"{end_time - start_time} per 1 batch")
+            except Exception as e:
+                #TODO Ваша обработка нарушения соединения с нодой
+                print(e)
+                break
 
 def analyze_trns(q_in: Queue):
     print("analyze_trns")
